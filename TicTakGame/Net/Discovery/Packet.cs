@@ -29,6 +29,15 @@ namespace TicTakGame.Net.Discovery
 
         public Dictionary<string, string> extra = new Dictionary<string, string>();
 
+        public Device GetDevice()
+        {
+            return new Device
+            {
+                clienName = extra["client_name"],
+                displayName = extra["display_name"]
+            };
+        }
+
         public static Packet FromBytes(byte[] bytes)
         {
             System.IO.MemoryStream memoryStream = new System.IO.MemoryStream();
