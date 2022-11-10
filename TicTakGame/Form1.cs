@@ -19,13 +19,38 @@ namespace TicTakGame
             InitializeComponent();
 
             discoveryServiceWorker.RunWorkerAsync();
-
-            
         }
 
-        private void discoveryServiceWorker_DoWork(object sender, DoWorkEventArgs e)
+        private void refreshDeviceList()
         {
-            discoveryService.LisenForDiscoveryPacket();
+            devicesDataGrid.Rows.Clear();
+
+            for (int i = 0; i < discoveryService.devices.Count; i++)
+            {
+                Net.Discovery.Device device = discoveryService.devices[i];
+                devicesDataGrid.Rows.Add(new string[] { device.iP.ToString(),device.clienName,device.status.ToString() });
+            }
+        }
+
+        private async void discoveryServiceWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            await discoveryService.LisenForDiscoveryPacket();
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+        //    discoveryService.StopLisenForDiscoveyPacket();
+         //   discoveryServiceWorker.CancelAsync();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            discoveryService.DiscoverAround();
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            refreshDeviceList();
         }
     }
 }

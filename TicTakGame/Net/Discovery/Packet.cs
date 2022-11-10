@@ -22,6 +22,8 @@ namespace TicTakGame.Net.Discovery
 
     class Packet
     {
+        public System.Net.IPEndPoint sourceEndPoint;
+
         public Type type;
         public Status status;
 
@@ -29,12 +31,12 @@ namespace TicTakGame.Net.Discovery
 
         public Dictionary<string, string> extra = new Dictionary<string, string>();
 
-        public Device GetDevice()
+        public Device GetDevice(System.Net.IPEndPoint remoteEndPoint)
         {
             return new Device
             {
+                iP = remoteEndPoint.Address,
                 clienName = extra["client_name"],
-                displayName = extra["display_name"]
             };
         }
 

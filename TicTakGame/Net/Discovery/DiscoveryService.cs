@@ -12,7 +12,7 @@ namespace TicTakGame.Net.Discovery
     {
         public IPAddress iP;
 
-        public string clienName, displayName;
+        public string clienName;
         public Status status;
 
         bool IEquatable<Device>.Equals(Device other)
@@ -48,20 +48,33 @@ namespace TicTakGame.Net.Discovery
 
         public List<Device> devices = new List<Device>();
 
-        private void DumpDiscoveryPacket()
+        private void log(string s)
+        {
+            System.IO.File.AppendAllText(@"C:\Users\amirs\Desktop\tiktok.log",s + "\n");
+        }
+
+        private async System.Threading.Tasks.Task<Device> DumpDiscoveryPacket()
         {
             while (true)
             {
                 try
                 {
-                    UdpReceiveResult result = udpClient.ReceiveAsync().Result;
+                    UdpReceiveResult result = await udpClient.ReceiveAsync();
                     Packet packet = Packet.FromBytes(result.Buffer);
+                    Device device = packet.GetDevice(result.RemoteEndPoint);
 
-                    if (devices.IndexOf(packet.GetDevice()) == -1)
-                        devices.Add(packet.GetDevice());
+                    if (device.clienName == Environment.MachineName)
+                        continue;
+                    else if (devices.IndexOf(device) == -1)
+                    {
+                        log($"Packet from {result.RemoteEndPoint} recived. {packet.type}");
+                        devices.Add(device);
+                    }
 
                     // Note: IPEndPoint was created with remote address and our local port
                     ReplayDiscoveryPacket(packet, new IPEndPoint(result.RemoteEndPoint.Address, Port));
+
+                   // return device;
                 }
                 catch (Expention.UnexpectedPackteRecevied) { }
             }
@@ -89,21 +102,24 @@ namespace TicTakGame.Net.Discovery
             }
 
             if (replay != null)
+            {
+                log($"Packet to {endPoint.ToString()} was sent. {packet.type.ToString()}");
                 callBackClient.Send(replay, replay.Length, endPoint);
+            }
         }
 
 
-        public void LisenForDiscoveryPacket()
+        public System.Threading.Tasks.Task<Device> LisenForDiscoveryPacket()
         {
             _IsDiscoverable = true;
 
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Any, Port);
             udpClient = new UdpClient(iPEndPoint);
-            replayThred = new Thread(new ThreadStart(this.DumpDiscoveryPacket));
-            replayThred.Start();
+
+            return DumpDiscoveryPacket();
         }
 
-        private void StopLisenForDiscoveyPacket()
+        public void StopLisenForDiscoveyPacket()
         {
             _IsDiscoverable = false;
             replayThred.Abort();
@@ -113,7 +129,7 @@ namespace TicTakGame.Net.Discovery
         private void SendBrodcastDiscoveryPacket()
         {
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Broadcast, Port);
-            UdpClient udpClient = new UdpClient(iPEndPoint);
+            UdpClient udpClient = new UdpClient();
             udpClient.EnableBroadcast = true;
 
             byte[] bytes = new Packet {
@@ -121,17 +137,20 @@ namespace TicTakGame.Net.Discovery
                 type = Type.Discovery,
                 extra =
                 {
-                    { "client_name" , System.Environment.MachineName },
-                    { "display_name",  this.displayName },
+                    { "client_name" , System.Environment.MachineName }
                 }
             }.ToBytes();
 
-            udpClient.Send()
+            udpClient.Send(bytes,bytes.Length,iPEndPoint);
         }
 
         public void DiscoverAround()
         {
-
+            SendBrodcastDiscoveryPacket();
         }
+
+        public EventHandler NewClientFound;
+
+
     }
 }
