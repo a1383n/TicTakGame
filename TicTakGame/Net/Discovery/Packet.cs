@@ -29,14 +29,14 @@ namespace TicTakGame.Net.Discovery
 
         public const byte PacketIdentifier = 0x8C;
 
-        public Dictionary<string, string> extra = new Dictionary<string, string>();
+        public string clientName;
 
         public Device GetDevice(System.Net.IPEndPoint remoteEndPoint)
         {
             return new Device
             {
                 iP = remoteEndPoint.Address,
-                clienName = extra["client_name"],
+                clienName = this.clientName
             };
         }
 
@@ -56,9 +56,9 @@ namespace TicTakGame.Net.Discovery
 
             return new Packet
             {
-                type = EnumHelper<Type, ushort>.GetEnum(binaryReader.ReadUInt16()),
-                status = EnumHelper<Status, ushort>.GetEnum(binaryReader.ReadUInt16().ToString()),
-                extra = JsonSerializer.Deserialize<Dictionary<string, string>>(binaryReader.ReadString() ?? "[]")
+                type = EnumHelper<Type, ushort>.GetEnum(binaryReader.ReadByte()),
+                status = EnumHelper<Status, ushort>.GetEnum(binaryReader.ReadByte()),
+                clientName = binaryReader.ReadString()
             };
         }
 
@@ -69,9 +69,9 @@ namespace TicTakGame.Net.Discovery
             System.IO.BinaryWriter binaryWriter = new System.IO.BinaryWriter(memoryStream);
 
             binaryWriter.Write(PacketIdentifier);
-            binaryWriter.Write(EnumHelper<Type,ushort>.GetValueByEnum(type));
-            binaryWriter.Write(EnumHelper<Status, ushort>.GetValueByEnum(status));
-            binaryWriter.Write(JsonSerializer.Serialize(extra));
+            binaryWriter.Write((byte) EnumHelper<Type,ushort>.GetValueByEnum(type));
+            binaryWriter.Write((byte) EnumHelper<Status, ushort>.GetValueByEnum(status));
+            binaryWriter.Write(clientName);
 
             return memoryStream.ToArray();
         }

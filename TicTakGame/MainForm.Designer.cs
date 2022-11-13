@@ -1,7 +1,7 @@
 ﻿
 namespace TicTakGame
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -32,16 +32,16 @@ namespace TicTakGame
             this.components = new System.ComponentModel.Container();
             this.discoveryServiceWorker = new System.ComponentModel.BackgroundWorker();
             this.devicesDataGrid = new System.Windows.Forms.DataGridView();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.ip = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.name = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.status = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.devicesDataGrid)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -72,23 +72,6 @@ namespace TicTakGame
             this.devicesDataGrid.Size = new System.Drawing.Size(430, 302);
             this.devicesDataGrid.TabIndex = 0;
             // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(6, 22);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(174, 19);
-            this.checkBox1.TabIndex = 2;
-            this.checkBox1.Text = "Make me hidden in network";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
-            // 
-            // timer1
-            // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 500;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
             // ip
             // 
             this.ip.HeaderText = "IP";
@@ -108,6 +91,23 @@ namespace TicTakGame
             this.status.HeaderText = "Status";
             this.status.Name = "status";
             this.status.ReadOnly = true;
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(6, 22);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(174, 19);
+            this.checkBox1.TabIndex = 2;
+            this.checkBox1.Text = "Make me hidden in network";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
+            // timer1
+            // 
+            this.timer1.Enabled = true;
+            this.timer1.Interval = 5000;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // groupBox1
             // 
@@ -131,12 +131,14 @@ namespace TicTakGame
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Manual";
             // 
-            // textBox1
+            // button1
             // 
-            this.textBox1.Location = new System.Drawing.Point(89, 22);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(112, 23);
-            this.textBox1.TabIndex = 0;
+            this.button1.Location = new System.Drawing.Point(55, 51);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 2;
+            this.button1.Text = "Connect";
+            this.button1.UseVisualStyleBackColor = true;
             // 
             // label1
             // 
@@ -147,14 +149,12 @@ namespace TicTakGame
             this.label1.TabIndex = 1;
             this.label1.Text = "Distention IP:";
             // 
-            // button1
+            // textBox1
             // 
-            this.button1.Location = new System.Drawing.Point(55, 51);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 2;
-            this.button1.Text = "Connect";
-            this.button1.UseVisualStyleBackColor = true;
+            this.textBox1.Location = new System.Drawing.Point(89, 22);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(112, 23);
+            this.textBox1.TabIndex = 0;
             // 
             // Form1
             // 
