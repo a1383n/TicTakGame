@@ -1,77 +1,116 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
+
 using TicTakGame.Net.Game;
+using TicTakGame.Main;
+using TicTakGame.Net.Enum;
+using TicTakGame.Net.Packet;
 
 namespace TicTakGame
 {
     public partial class GameForm : Form
     {
-        private Net.Game.GameService gameService;
-        private Game.Game game;
+        private GameService gameService;
+        private Game game;
 
-        public GameForm(GameService service)
+        public GameForm()
         {
-            game = new Game.Game(service);
-            game.GameStatusChanged += Game_GameStatusChanged;
-
             InitializeComponent();
         }
 
-        private void Game_GameStatusChanged(Game.GameStatus status)
+        private async void onDoWork(object sender, DoWorkEventArgs args)
         {
-            switch (status)
+            /*
+                Handshake: -1
+                ReceivePacket: -2
+                SendPacket: int
+            */
+            if (args.Argument is int)
             {
-                case Game.GameStatus.CellSelected:
-                    groupBox1.Enabled = false;
-                    if (game.getGameResult() != Game.GameResult.InProgress)
-                    {
-                        switch (game.getGameResult())
+                switch ((int)args.Argument)
+                {
+                    case -1:
+                        await game.startHandshake();
+                   //     game.changeStatus(GameStatus.PlayerTurn);
+                        break;
+                    case -2:
+                        await game.waitingForOtherPlayerTurn();
+                        // changeStatus(GameStatus.PlayerTurn);
+                        break;
+                    default:
+                        if ((int)args.Argument >= 0)
+                            await game.play((int)args.Argument);
+                        break;
+                }
+            }
+        }
+
+        public async void initializeService(GameService service)
+        {
+            gameService = service;
+            game = new Game(service);
+            game.GameStatusChanged += Game_GameStatusChanged;
+
+            await game.startHandshake();
+        }
+
+        private void Game_GameStatusChanged(GameStatus status, object extra)
+        {
+            Action action = delegate
+            {
+                switch (status)
+                {
+                    case GameStatus.WaitingForHandShake:
+                        statusLabel.Text = status.ToString();
+                        groupBox1.Enabled = false;
+                        break;
+                    case GameStatus.PlayerTurn:
+                        statusLabel.Text = game.isMyTurn() ? "Your turn" : "Turn " + game.currentPlayer.role;
+                        groupBox1.Enabled = game.isMyTurn();
+                        pictureBox1.Image = game.isMyTurn() ? game.currentPlayer.isX() ? Properties.Resources.x : Properties.Resources.o : !game.currentPlayer.isX() ? Properties.Resources.x : Properties.Resources.o;
+                        
+                        if (!game.isMyTurn()) {
+                            while(gameWorker.IsBusy) {}
+                            gameWorker.RunWorkerAsync(-2);
+                        }
+                        break;
+                    case GameStatus.CellSelected:
+                        groupBox1.Enabled = false;
+                        selectCell((int)extra,game.currentPlayer.role);
+                        break;
+                    case GameStatus.End:
+                        switch ((GameResult)extra)
                         {
-                            case Game.GameResult.Draw:
-                                MessageBox.Show("Game is draw.");
+                            case GameResult.Draw:
+                                MessageBox.Show("Draw!", "Game Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                this.Close();
                                 break;
-                            case Game.GameResult.XWin:
-                                MessageBox.Show("X Win");
-                                break;
-                            case Game.GameResult.OWin:
-                                MessageBox.Show("O Win");
+                            case GameResult.PlayerWin:
+                                if (game.isMyTurn())
+                                    MessageBox.Show("You win", "Game Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                else
+                                    MessageBox.Show($"{game.currentPlayer.role} was win", "Game Result", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                                this.Close();
                                 break;
                         }
+                        break;
+                }
+            };
 
-                        this.Close();
-                        return;
-                    }else
-                    {
-                        game.next();
-                    }
-                    break;
-                case Game.GameStatus.TurnX:
-                    statusLabel.Text = "X turn";
-                    if (game.currentPlayer == game.playerRule)
-                    {
-                        groupBox1.Enabled = true;
-                    }else
-                    {
-                        gameWorker.RunWorkerAsync();
-                    }
-                    break;
-                case Game.GameStatus.TurnO:
-                    statusLabel.Text = "O turn";
-                    if (game.currentPlayer == game.playerRule)
-                    {
-                        groupBox1.Enabled = true;
-                    }else
-                    {
-                        gameWorker.RunWorkerAsync();
-                    }
-                    break;
+            if (this.InvokeRequired)
+                this.Invoke(action);
+            else
+                action.Invoke();
+        }
 
-            }
+        private void selectCell(int index, Role role)
+        {
+            Button button = (Button)groupBox1.Controls[index];
+            button.Enabled = false;
+            button.BackgroundImageLayout = ImageLayout.Stretch;
+            button.BackgroundImage = role == Role.X ? Properties.Resources.x : Properties.Resources.o;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -79,23 +118,7 @@ namespace TicTakGame
             Button button = (Button)sender;
             int index = button.TabIndex;
 
-            button.Enabled = false;
-            button.BackgroundImageLayout = ImageLayout.Stretch;
-            button.BackgroundImage = game.currentPlayer == Game.Game.XSymbol ? Properties.Resources.x : Properties.Resources.o;
-
-            game.selectCell((byte)index);
-        }
-
-
-
-        private async void gameWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            Packet packet = await gameService.receivePacket();
-            Button button = (Button)groupBox1.Controls[packet.selectedBlock];
-            button.Enabled = false;
-            button.BackgroundImageLayout = ImageLayout.Stretch;
-            button.BackgroundImage = game.currentPlayer == Game.Game.XSymbol ? Properties.Resources.x : Properties.Resources.o;
-            game.selectCell(packet.selectedBlock);
+            gameWorker.RunWorkerAsync(index);
         }
     }
 }

@@ -2,30 +2,31 @@
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Net;
-using System.Net.Sockets;
-using System.Threading.Tasks;
+
+using TicTakGame.Net.Game;
+using TicTakGame.Net.Enum;
+using TicTakGame.Utils;
 
 namespace TicTakGame
 {
     public partial class MainForm : Form
     {
-        private Net.Game.GameService gameService;
+        private GameService gameService;
 
         public MainForm()
         {
             InitializeComponent();
 
-            //  ipLabel.Text = Utils.NetUtils.getIPAddress(Utils.NetUtils.getPrimeryNetworkInterface()).ToString();
-            ipLabel.Text = "0.0.0.0";
+            ipLabel.Text = NetUtils.getLocalIPAddress().ToString();
         }
 
-        private void GameService_ServiceStatusChanged(Net.Game.ServiceStatus status)
+        private void GameService_ServiceStatusChanged(ServiceStatus status)
         {
             Action action = delegate
             {
                 switch (status)
                 {
-                    case Net.Game.ServiceStatus.IDLE:
+                    case ServiceStatus.IDLE:
                         portLabel.Text = "N/A";
                         serverStatusLabel.Text = "IDLE";
                         serverStatusLabel.ForeColor = System.Drawing.Color.Black;
@@ -34,11 +35,7 @@ namespace TicTakGame
                         groupBox2.Enabled = true;
                         startServerButton.Text = "Start";
                         break;
-                    case Net.Game.ServiceStatus.Disconnected:
-                        serverStatusLabel.Text = "Disconnected";
-                        serverStatusLabel.ForeColor = System.Drawing.Color.Red;
-                        break;
-                    case Net.Game.ServiceStatus.WaitingForConnection:
+                    case ServiceStatus.WaitingForConnection:
                         portLabel.Text = gameService.serverEndpoint.Port.ToString();
                         serverStatusLabel.Text = "Started. Waiting ...";
                         serverStatusLabel.ForeColor = System.Drawing.Color.Green;
@@ -46,14 +43,18 @@ namespace TicTakGame
                         progressBar1.Visible = false;
                         groupBox1.Enabled = true;
                         break;
-                    case Net.Game.ServiceStatus.Connecting:
+                    case ServiceStatus.Connecting:
                         serverStatusLabel.Text = "Connecting ...";
                         serverStatusLabel.ForeColor = System.Drawing.Color.Green;
                         break;
-                    case Net.Game.ServiceStatus.Connected:
-                        this.Hide();
-                        (new GameForm(gameService)).Show();
-                        this.Show();
+                    case ServiceStatus.ClientConnected:
+                        serverStatusLabel.Text = "Connected";
+                        progressBar1.Visible = false;
+                        GameForm gameForm = new GameForm();
+                        gameForm.initializeService(gameService);
+                        gameForm.Show();
+                     //   gameService.cancellationToken.Cancel();
+                     //   gameService.Dispose();
                         break;
                 }
             };
@@ -66,7 +67,7 @@ namespace TicTakGame
 
         private void startServerButton_Click(object sender, EventArgs e)
         {
-            if (gameService == null || gameService.status != Net.Game.ServiceStatus.WaitingForConnection)
+            if (gameService == null || gameService.status == ServiceStatus.IDLE)
             {
                 groupBox1.Enabled = false;
                 groupBox2.Enabled = false;
@@ -85,7 +86,7 @@ namespace TicTakGame
             }
         }
 
-        private async void serverWorker_DoWork(object sender, DoWorkEventArgs e)
+        private void serverWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             try
             {
@@ -111,7 +112,7 @@ namespace TicTakGame
                 return;
             }
 
-            if (gameService == null || gameService.status == Net.Game.ServiceStatus.IDLE || gameService.status == Net.Game.ServiceStatus.Disconnected)
+            if (gameService == null || gameService.status == ServiceStatus.IDLE)
             {
                 groupBox1.Enabled = false;
                 groupBox2.Enabled = false;

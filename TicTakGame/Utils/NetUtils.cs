@@ -8,14 +8,18 @@ namespace TicTakGame.Utils
 {
     class NetUtils
     {
-        public static NetworkInterface getPrimeryNetworkInterface()
+        public static IPAddress getLocalIPAddress()
         {
-            return NetworkInterface.GetAllNetworkInterfaces()[NetworkInterface.LoopbackInterfaceIndex];
-        }
+            IPAddress[] iPs =  Dns.GetHostEntry(Dns.GetHostName()).AddressList;
 
-        public static IPAddress getIPAddress(NetworkInterface network)
-        {
-            return network.GetIPProperties().UnicastAddresses[1].Address;
+            for (int i = 0; i < iPs.Length; i++)
+            {
+                IPAddress iPAddress = iPs[i];
+                if (iPAddress.GetAddressBytes().Length == 4)
+                    return iPAddress;
+            }
+
+            throw new Exception("Unable to find your ip address");
         }
     }
 }

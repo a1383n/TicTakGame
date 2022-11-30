@@ -29,6 +29,8 @@ namespace TicTakGame
         /// </summary>
         private void InitializeComponent()
         {
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
@@ -197,8 +199,8 @@ namespace TicTakGame
             this.pictureBox1.TabStop = false;
             // 
             // gameWorker
+            this.gameWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.onDoWork);
             // 
-            this.gameWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.gameWorker_DoWork);
             // 
             // GameForm
             // 

@@ -119,6 +119,7 @@ namespace TicTakGame
             this.ipAddressTextBox.Name = "ipAddressTextBox";
             this.ipAddressTextBox.Size = new System.Drawing.Size(112, 23);
             this.ipAddressTextBox.TabIndex = 0;
+            this.ipAddressTextBox.Text = "127.0.0.1";
             // 
             // groupBox1
             // 
