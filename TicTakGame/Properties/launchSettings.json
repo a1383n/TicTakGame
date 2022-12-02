@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "TicTakGame": {
+      "commandName": "Project",
+      "remoteDebugEnabled": false,
+      "remoteDebugMachine": "DESKTOP-N35VK2U",
+      "authenticationMode": "Windows"
+    }
+  }
+}

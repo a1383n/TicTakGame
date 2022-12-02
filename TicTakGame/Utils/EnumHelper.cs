@@ -34,4 +34,19 @@ namespace TicTakGame.Utils
             return keyValuePairs;
         }
     }
+
+    static class EnumExtensions
+    {
+        public static E ReadEnum<E, T>(this System.IO.BinaryReader binaryReader) where E : Enum
+        {
+            return EnumHelper<E, T>.GetEnum(binaryReader.ReadByte());
+        }
+
+        public static void Write<E>(this System.IO.BinaryWriter binaryWriter, E e) where E : Enum
+        {
+            binaryWriter.Write(EnumHelper<E,byte>.GetValueByEnum(e));
+        }
+    }
+
+
 }

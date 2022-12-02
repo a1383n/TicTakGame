@@ -23,6 +23,14 @@ namespace TicTakGame
             Application.SetCompatibleTextRenderingDefault(false);
 
             Application.Run(new MainForm());
+            Application.Exit();
+
+            // var v = new TicTakGame.Net.Packet.HandShakeResult.Builder()
+            //     .addPlayer(new TicTakGame.Net.Packet.Player(IPAddress.Loopback))
+            //     .addPlayer(new TicTakGame.Net.Packet.Player(IPAddress.Loopback))
+            //     .build();
+
+            // Console.WriteLine(v.toBytes().Length);
         }
 
     }
