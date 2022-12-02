@@ -6,6 +6,7 @@ using TicTakGame.Net.Game;
 using TicTakGame.Main;
 using TicTakGame.Net.Enum;
 using TicTakGame.Net.Packet;
+using TicTakGame.Utils;
 
 namespace TicTakGame
 {
@@ -13,46 +14,20 @@ namespace TicTakGame
     {
         private GameService gameService;
         private Game game;
+        private BackgroundQueue queue = new BackgroundQueue();
 
         public GameForm()
         {
             InitializeComponent();
         }
 
-        private async void onDoWork(object sender, DoWorkEventArgs args)
-        {
-            /*
-                Handshake: -1
-                ReceivePacket: -2
-                SendPacket: int
-            */
-            if (args.Argument is int)
-            {
-                switch ((int)args.Argument)
-                {
-                    case -1:
-                        await game.startHandshake();
-                   //     game.changeStatus(GameStatus.PlayerTurn);
-                        break;
-                    case -2:
-                        await game.waitingForOtherPlayerTurn();
-                        // changeStatus(GameStatus.PlayerTurn);
-                        break;
-                    default:
-                        if ((int)args.Argument >= 0)
-                            await game.play((int)args.Argument);
-                        break;
-                }
-            }
-        }
-
-        public async void initializeService(GameService service)
+        public void initializeService(GameService service)
         {
             gameService = service;
             game = new Game(service);
             game.GameStatusChanged += Game_GameStatusChanged;
 
-            await game.startHandshake();
+            queue.QueueTask(game.startHandshake());
         }
 
         private void Game_GameStatusChanged(GameStatus status, object extra)
@@ -71,8 +46,7 @@ namespace TicTakGame
                         pictureBox1.Image = game.isMyTurn() ? game.currentPlayer.isX() ? Properties.Resources.x : Properties.Resources.o : !game.currentPlayer.isX() ? Properties.Resources.x : Properties.Resources.o;
                         
                         if (!game.isMyTurn()) {
-                            while(gameWorker.IsBusy) {}
-                            gameWorker.RunWorkerAsync(-2);
+                            queue.QueueTask(async delegate { await game.waitingForOtherPlayerTurn(); });
                         }
                         break;
                     case GameStatus.CellSelected:
@@ -118,7 +92,7 @@ namespace TicTakGame
             Button button = (Button)sender;
             int index = button.TabIndex;
 
-            gameWorker.RunWorkerAsync(index);
+            queue.QueueTask(game.play(index));
         }
     }
 }

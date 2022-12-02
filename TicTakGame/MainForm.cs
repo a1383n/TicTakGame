@@ -52,9 +52,15 @@ namespace TicTakGame
                         progressBar1.Visible = false;
                         GameForm gameForm = new GameForm();
                         gameForm.initializeService(gameService);
-                        gameForm.Show();
-                     //   gameService.cancellationToken.Cancel();
-                     //   gameService.Dispose();
+                        this.Hide();
+                        gameForm.ShowDialog();
+                        this.Show();
+                        gameService.cancellationToken.Cancel();
+                        gameService.Dispose();
+
+                        groupBox1.Enabled = true;
+                        groupBox2.Enabled = true;
+                        progressBar1.Visible = false;
                         break;
                 }
             };

@@ -114,7 +114,7 @@ namespace TicTakGame.Main
             // Waiting for GamePacket
             byte[] buffer = await service.getPacket(GamePacket.Size);
             GamePacket packet = GamePacket.FromBytes(buffer);
-            changeStatus(GameStatus.CellSelected, packet.cellIndex);
+            changeStatus(GameStatus.CellSelected, (int)packet.cellIndex);
 
             if (packet.playerId != currentPlayer.id)
                 throw new Exception("Unexpected packet");
@@ -131,7 +131,7 @@ namespace TicTakGame.Main
                 currentPlayer = players.Find(x => x.role != currentPlayer.role);
                 changeStatus(GameStatus.PlayerTurn);
             }
-            else changeStatus(GameStatus.End);
+            else changeStatus(GameStatus.End,gameResult);
         }
 
         public bool isMyTurn() => currentPlayer.id == myId;

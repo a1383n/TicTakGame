@@ -199,7 +199,7 @@ namespace TicTakGame
             this.pictureBox1.TabStop = false;
             // 
             // gameWorker
-            this.gameWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.onDoWork);
+            // this.gameWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.onDoWork);
             // 
             // 
             // GameForm
