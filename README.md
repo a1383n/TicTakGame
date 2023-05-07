@@ -4,6 +4,7 @@ The simple Tic tac (X-O) game thats works in **LAN**. This game was develope wit
 
 This game use **TCP** socket communication to interact with other computer in **LAN** network
 
+
 ## How it's work
 
 1. In first page of application we have two section, one for start server and host the game and another one for connect to running server.
