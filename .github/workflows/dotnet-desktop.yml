@@ -84,4 +84,4 @@ jobs:
         Configuration: ${{ matrix.configuration }}
 
     - name: Build
-      run: dotnet build -c Debug
+      run: dotnet build -c ${{ matrix.configuration }}
