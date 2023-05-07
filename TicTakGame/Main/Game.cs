@@ -8,6 +8,9 @@ using TicTakGame.Net.Enum;
 
 namespace TicTakGame.Main
 {
+    /// <summary>
+    /// Game class manage game logic and handle game events
+    /// </summary>
     class Game
     {
         private Net.Game.GameService service;
@@ -20,6 +23,10 @@ namespace TicTakGame.Main
         public delegate void GameEvent(GameStatus status, object extra);
         public event GameEvent GameStatusChanged;
 
+        /// <summary>
+        /// Create new instance of Game class
+        /// </summary>
+        /// <param name="service">The connected game service object</param>
         public Game(Net.Game.GameService service)
         {
             this.service = service;
@@ -28,6 +35,12 @@ namespace TicTakGame.Main
             Array.Fill(gameBoard, (byte)0);
         }
 
+        /// <summary>
+        /// Do a handshake with other side.If it's server, should build handshake packet and send it to other side.otherwise should wating for that packet.
+        /// 
+        /// Note: GameStatusChanged event fired before method return result.
+        /// </summary>
+        /// <returns>The HandShake object thats send or received</returns>
         public async Task<HandShakeResult> startHandshake()
         {
             if (!service.client.Connected)
@@ -44,8 +57,10 @@ namespace TicTakGame.Main
                 IPAddress localIPAddress = NetUtils.getLocalIPAddress();
                 Player my = new Player(localIPAddress);
 
+                // Set itself id
                 myId = my.id;
 
+                // Build handshake object
                 HandShakeResult handShakeResult = new HandShakeResult.Builder()
                     .addPlayer(my)
                     .addPlayer(new Player(((IPEndPoint)service.client.Client.RemoteEndPoint).Address))
@@ -55,8 +70,10 @@ namespace TicTakGame.Main
                 players = handShakeResult.players;
                 currentPlayer = players.Find(x => x.id == handShakeResult.firstTurnPlayerId);
 
+                // Send packet
                 await service.sendPacket(handShakeResult);
 
+                // Fire event
                 changeStatus(GameStatus.PlayerTurn);
 
                 return handShakeResult;
@@ -66,12 +83,14 @@ namespace TicTakGame.Main
                 // Client should waiting for HandShakeResult to be sent from server
                 HandShakeResult handShakeResult = HandShakeResult.fromBytes(await service.getPacket(HandShakeResult.Size));
 
+                // If the packet was received, first player is the server and second one is itself
                 myId = handShakeResult.players[1].id;
 
                 // Apply handshake data
                 players = handShakeResult.players;
                 currentPlayer = players.Find(x => x.id == handShakeResult.firstTurnPlayerId);
 
+                // Fire event
                 changeStatus(GameStatus.PlayerTurn);
 
                 return handShakeResult;

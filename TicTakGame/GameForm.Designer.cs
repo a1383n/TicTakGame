@@ -69,7 +69,6 @@ namespace TicTakGame
             // 
             // button1
             // 
-            this.button1.BackgroundImage = global::TicTakGame.Properties.Resources.o;
             this.button1.Location = new System.Drawing.Point(35, 40);
             this.button1.Margin = new System.Windows.Forms.Padding(0);
             this.button1.Name = "button1";
